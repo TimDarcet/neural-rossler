@@ -5,12 +5,13 @@ from torch.utils.data import Dataset, DataLoader, random_split
 
 
 class RosslerDataset(Dataset):
-    def __init__(self, nb_samples, init_pos, delta_t, history):
+    def __init__(self, nb_samples, init_pos, delta_t, history, only_y):
         super().__init__()
         self.nb_samples = nb_samples
         self.init_pos = init_pos
         self.delta_t = delta_t
         self.history = history
+        self.only_y = only_y
 
         self.rm = RosslerMap(delta_t=delta_t)
 
@@ -22,11 +23,14 @@ class RosslerDataset(Dataset):
         return self.nb_samples - 1 - self.history
 
     def __getitem__(self, idx):
-        return self.w[idx : idx + self.history + 2]
+        if self.only_y:
+            return self.w[idx : idx + self.history + 2, 1:2]
+        else:
+            return self.w[idx : idx + self.history + 2]
 
 
 class RosslerDataModule(pl.LightningDataModule):
-    def __init__(self, init_pos, nb_samples, batch_size, train_prop, delta_t, history):
+    def __init__(self, init_pos, nb_samples, batch_size, train_prop, delta_t, history, only_y):
         super().__init__()
         self.batch_size = batch_size
         self.train_prop = train_prop
@@ -34,13 +38,14 @@ class RosslerDataModule(pl.LightningDataModule):
         self.init_pos = init_pos
         self.delta_t = delta_t
         self.history = history
+        self.only_y = only_y
 
     def prepare_data(self):
         pass
 
     def setup(self, stage=None):
         # Assign train/val datasets for use in dataloaders
-        self.full_dataset = RosslerDataset(self.nb_samples, self.init_pos, self.delta_t, self.history)
+        self.full_dataset = RosslerDataset(self.nb_samples, self.init_pos, self.delta_t, self.history, self.only_y)
 
         if stage == 'fit' or stage is None:
             train_size = int(len(self.full_dataset) * self.train_prop)
@@ -61,13 +66,13 @@ class RosslerDataModule(pl.LightningDataModule):
     def val_dataloader(self):
         return torch.utils.data.DataLoader(self.val_dataset,
                                            batch_size=self.batch_size,
-                                           shuffle=True,
+                                           shuffle=False,
                                            num_workers=8,
                                            pin_memory=True)
 
     def test_dataloader(self):
         return torch.utils.data.DataLoader(self.test_dataset,
                                            batch_size=self.batch_size,
-                                           shuffle=True,
+                                           shuffle=False,
                                            num_workers=8,
                                            pin_memory=True)

@@ -18,12 +18,14 @@ def main(args):
                            batch_size=args.batch_size,
                            train_prop=args.train_prop,
                            delta_t=args.delta_t,
-                           history=args.history)
+                           history=args.history,
+                           only_y=args.only_y)
 
     # Define model
     model = FC_predictor(n_hidden=args.n_hidden,
-                         in_size=3 * (1 + args.history),
+                         in_size=(3 - 2 * int(args.only_y)) * (1 + args.history),
                          hidden_size=args.hidden_size,
+                         out_size=3 - 2 * int(args.only_y),
                          lr=args.lr)
 
     # Exp logger
@@ -35,8 +37,8 @@ def main(args):
                                    mode='min',
                                    save_last=True,
                                    filename='{epoch}-{val_loss:.2f}-{train_loss:.2f}')
-    trainer = pl.Trainer(gpus=1,
-                         auto_select_gpus=True,
+    trainer = pl.Trainer(gpus=0,
+                        #  auto_select_gpus=True,
                          max_epochs=args.epochs,
                          callbacks=[checkpointer],
                          logger=logger)
@@ -52,11 +54,13 @@ if __name__ ==  '__main__':
     parser.add_argument('--batch-size', type=int, default=512)
     parser.add_argument('--train-prop', type=float, default=0.8)
     parser.add_argument('--delta-t', type=float, default=1e-3)
-    parser.add_argument('--history', type=int, default=0)
+    parser.add_argument('--history', type=int, default=3)
+    parser.add_argument('--only-y', type=bool, default=True)
+    
 
     parser.add_argument('--n-hidden', type=int, default=10)
     parser.add_argument('--hidden-size', type=int, default=20)
-    parser.add_argument('--lr', type=float, default=1e-3)
+    parser.add_argument('--lr', type=float, default=1e-7)
 
     parser.add_argument('--epochs', type=int, default=10)
 
