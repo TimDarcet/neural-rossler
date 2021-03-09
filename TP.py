@@ -2,6 +2,8 @@ import numpy as np
 from numpy.linalg import qr, solve, norm
 from scipy.linalg import expm
 from rossler_map import RosslerMap
+from time_series import Rossler_model
+import seaborn as sns
 
 import matplotlib as mpl
 from mpl_toolkits.mplot3d import Axes3D
@@ -46,17 +48,24 @@ def newton(f,jacob,x):
         x = x-solve(jacob(x),f(v=x))
         tol = norm(tol-x)
     return x
-    
-     
-    
+
+
 if __name__ == '__main__':
 
-    Niter = 2000000
-    delta_t = 1e-2
+    # Niter = 2000000
+    Niter = 50000
+    delta_t = 1e-3
     ROSSLER_MAP = RosslerMap(delta_t=delta_t)
     INIT = np.array([-5.75, -1.6,  0.02])
     traj,t = ROSSLER_MAP.full_traj(Niter, INIT)
-    
+    for i in range(len(traj) - 1):
+        print(((traj[i] - traj[i+1]) ** 2).sum() / 3)
+    # print(traj.shape)
+    # print(traj)
+    plt.plot(traj[:, 1])
+    # sns.kdeplot(traj[:, 1])
+    plt.show()
+
     fig = plt.figure()
     ax = fig.gca(projection='3d')
     ax.plot(traj[:,0], traj[:,1], traj[:,2])
@@ -65,7 +74,7 @@ if __name__ == '__main__':
 
     error = norm(fix_point - ROSSLER_MAP.equilibrium())
     print("equilibrium state :", fix_point, ", error : ", error)
-    
+
     lyap = lyapunov_exponent(traj, ROSSLER_MAP.jacobian, max_it=Niter, delta_t=delta_t)
     print("Lyapunov Exponents :", lyap, "with delta t =", delta_t)
 
