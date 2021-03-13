@@ -19,7 +19,7 @@ def lyapunov_exponent(traj, jacobian, max_it=1000, delta_t=1e-3):
     for i in range(max_it):
         jacob = jacobian(traj[i,:])
         #WARNING this is true for the jacobian of the continuous system!
-        w_next = np.dot(expm(jacob * delta_t),w) 
+        w_next = np.dot(expm(jacob * delta_t), w) 
         #if delta_t is small you can use:
         #w_next = np.dot(np.eye(n)+jacob * delta_t,w)
     
@@ -36,8 +36,8 @@ def lyapunov_exponent(traj, jacobian, max_it=1000, delta_t=1e-3):
         if i//(max_it/100)>chk:
             print(i//(max_it/100))
             chk +=1
-    
-    return  np.mean(np.log(rs), axis=0) / delta_t
+
+    return np.mean(np.log(rs), axis=0) / delta_t
 
 def newton(f,jacob,x):
     #newton raphson method
@@ -53,29 +53,31 @@ def newton(f,jacob,x):
 if __name__ == '__main__':
 
     # Niter = 2000000
-    Niter = 50000
-    delta_t = 1e-3
-    ROSSLER_MAP = RosslerMap(delta_t=delta_t)
-    INIT = np.array([-5.75, -1.6,  0.02])
-    traj,t = ROSSLER_MAP.full_traj(Niter, INIT)
-    for i in range(len(traj) - 1):
-        print(((traj[i] - traj[i+1]) ** 2).sum() / 3)
-    # print(traj.shape)
-    # print(traj)
-    plt.plot(traj[:, 1])
-    # sns.kdeplot(traj[:, 1])
-    plt.show()
+    # Niter = 50000
+    # delta_t = 1e-3
+    # ROSSLER_MAP = RosslerMap(delta_t=delta_t)
+    # INIT = np.array([-5.75, -1.6,  0.02])
+    # traj,t = ROSSLER_MAP.full_traj(Niter, INIT)
+    # for i in range(len(traj) - 1):
+    #     print(((traj[i] - traj[i+1]) ** 2).sum() / 3)
+    # # print(traj.shape)
+    # # print(traj)
+    # plt.plot(traj[:, 1])
+    # # sns.kdeplot(traj[:, 1])
+    # plt.show()
 
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
-    ax.plot(traj[:,0], traj[:,1], traj[:,2])
+    # fig = plt.figure()
+    # ax = fig.gca(projection='3d')
+    # ax.plot(traj[:,0], traj[:,1], traj[:,2])
     
-    fix_point = newton(ROSSLER_MAP.v_eq, ROSSLER_MAP.jacobian, INIT)
+    # fix_point = newton(ROSSLER_MAP.v_eq, ROSSLER_MAP.jacobian, INIT)
 
-    error = norm(fix_point - ROSSLER_MAP.equilibrium())
-    print("equilibrium state :", fix_point, ", error : ", error)
+    # error = norm(fix_point - ROSSLER_MAP.equilibrium())
+    # print("equilibrium state :", fix_point, ", error : ", error)
 
-    lyap = lyapunov_exponent(traj, ROSSLER_MAP.jacobian, max_it=Niter, delta_t=delta_t)
-    print("Lyapunov Exponents :", lyap, "with delta t =", delta_t)
+    # lyap = lyapunov_exponent(traj, ROSSLER_MAP.jacobian, max_it=Niter, delta_t=delta_t)
+    # print("Lyapunov Exponents :", lyap, "with delta t =", delta_t)
 
-    plt.show()
+    # plt.show()
+
+    rm = Rossler_model()
